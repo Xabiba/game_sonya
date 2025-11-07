@@ -284,33 +284,27 @@ html, body {
   width: 100%;
   height: 100%;
   z-index: 2;
-  padding-left: 30%;
-  box-sizing: border-box;
 }
 
 .text-slide-content {
-  max-width: 800px; /* Фиксированная максимальная ширина */
-  width: 90%;
-  padding: 50px 40px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 25px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-  margin: 20px auto; /* auto по бокам для центровки */
-  backdrop-filter: blur(15px);
-  min-height: 75vh;
+  max-width: 800px;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  margin: 20px;
+  backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
+  align-items: center; /* ДОБАВИТЬ - центрируем содержимое */
 }
 
 .text-slide .caption {
   font-size: 18px;
   line-height: 1.6;
   margin-bottom: 20px;
-  width: 100%;
-  text-align: center;
+  width: 100%; /* ДОБАВИТЬ */
+  text-align: center; /* ДОБАВИТЬ */
 }
 
 .text-slide .caption span {
@@ -320,33 +314,24 @@ html, body {
   padding: 0;
   text-shadow: 0 2px 12px rgba(0,0,0,.8);
   font-weight: 500;
-  display: block;
-  width: 100%;
-  text-align: center;
-}
-
-/* Верхний текст */
-.text-slide #textCaptionTop {
-  margin-top: 30px;
-  margin-bottom: 25px;
-  width: 100%;
+  display: block; /* ДОБАВИТЬ */
+  width: 100%; /* ДОБАВИТЬ */
 }
 
 .text-slide #textCaptionTop span {
   font-size: 22px;
   font-weight: 600;
+  margin-bottom: 25px;
   color: #fff;
-  text-align: center;
 }
 
 .text-slide #textCaptionBottom span {
   font-size: 16px;
   line-height: 1.7;
   color: #fff;
-  text-align: center;
 }
 
-/* Кнопка "Начать игру" - по центру */
+/* Кнопка "Начать игру" - УБРАТЬ ВСЕ СДВИГИ */
 .start-button {
   background: linear-gradient(45deg, #FF416C, #FF4B2B);
   color: white;
@@ -360,6 +345,7 @@ html, body {
   transition: all 0.3s ease;
   margin-top: 30px;
   letter-spacing: 1px;
+  /* УБРАТЬ margin-left и transform */
 }
 
 .start-button:hover {
