@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Фотоистория</title>
+<style>
+html, body {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Главный контейнер всей сцены */
+#stage {
+  position: relative;
+  width: 100vw; height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Фон с вашим изображением */
+#staticBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: url('./images/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Затемнение для лучшей читаемости текста */
+.backgroundOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+/* Подписи сверху и снизу */
+.caption {
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-shadow: 0 2px 12px rgba(0,0,0,.8);
+  z-index: 10;
+  margin: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.caption span {
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  padding: 10px 20px;
+  display: inline-block;
+  max-width: 80%;
+}
+
+/* === ДОБАВЬТЕ ЭТОТ МЕДИАЗАПРОС ПРЯМО ЗДЕСЬ === */
+@media (max-width: 768px) {
+  .caption {
+    font-size: 18px;
+  }
+  
+  .caption span {
+    padding: 8px 15px;
+    max-width: 95vw;
+  }
+}
+/* === КОНЕЦ МЕДИАЗАПРОСА === */
+
+/* --- Принудительное абсолютное позиционирование подписей --- */
+#captionTop, #captionBottom {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 30;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* подписи внутри span (чтобы не вылезали за экран) */
+#captionTop span, #captionBottom span {
+  display: inline-block;
+  max-width: 90vw;
+  padding: 10px 20px;
+  box-sizing: border-box;
+}
+
+/* Контейнер фотографии */
+#world {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Фото фиксируется по центру экрана */
+#photo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 5;
+  transform-origin: center center;
+}
+
+/* Фото для перехода (следующее) */
+#nextPhoto {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  z-index: 4;
+  opacity: 0;
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Хотспоты (круги) */
+.hotspot {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(4px);
+  z-index: 20;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 1 !important;
+}
+
+.hotspot.red {
+  background: rgba(255,0,0,0.4);
+  border: 2px solid rgba(255,255,255,0.8);
+}
+
+.hotspot.blue {
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+}
+
+/* Новый стиль для прозрачных хотспотов */
+.hotspot.transparent {
+  background: transparent !important;
+  border: 2px solid transparent !important;
+  backdrop-filter: none !important;
+}
+
+.hotspot.transparent.fade-in {
+  background: rgba(255,255,255,0.15) !important;
+  border: 2px solid rgba(255,255,255,0.4) !important;
+  backdrop-filter: blur(4px) !important;
+  transition: all 1.5s ease-in-out;
+}
+
+/* Стиль для кнопки назад с изображением */
+.hotspot.back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.hotspot.back:hover img {
+  transform: scale(1.1);
+}
+
+/* Интерфейс: HUD, кнопки, навигация */
+#zoomHud, #nextBtn, #photoNumber, #navPanel {
+  position: fixed;
+  z-index: 50;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(0,0,0,0.8);
+  transition: opacity 0.5s ease;
+}
+
+#zoomHud {
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+/* Скрываем кнопку NEXT */
+#nextBtn {
+  display: none;
+}
+#photoNumber {
+  display: none;
+}
+/* Делаем нижнюю панель невидимой */
+#navPanel {
+  display: none;
+}
+
+/* Состояние перехода */
+.zooming {
+  pointer-events: none;
+}
+
+.zooming .hotspot {
+  opacity: 0 !important;
+  transition: opacity 0.3s ease;
+}
+
+.zooming #captionTop,
+.zooming #captionBottom,
+.zooming #zoomHud,
+.zooming #nextBtn,
+.zooming #photoNumber,
+.zooming #navPanel {
+  opacity: 0;
+}
+
+/* Анимация появления хотспотов */
+@keyframes hotspotPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.hotspot.pulse {
+  animation: hotspotPulse 2s infinite;
+}
+
+/* === СТИЛИ ДЛЯ ТЕКСТОВЫХ СЛАЙДОВ === */
+.text-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.text-slide-content {
+  max-width: 800px;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  margin: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.text-slide .caption {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.text-slide .caption span {
+  background: transparent;
+  backdrop-filter: none;
+  color: #fff;
+  padding: 0;
+  text-shadow: 0 2px 12px rgba(0,0,0,.8);
+  font-weight: 500;
+}
+
+.text-slide #textCaptionTop span {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #fff;
+}
+
+.text-slide #textCaptionBottom span {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #fff;
+}
+
+/* Кнопка "Начать игру" */
+.start-button {
+  background: linear-gradient(45deg, #FF416C, #FF4B2B);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(255, 75, 43, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 30px;
+  letter-spacing: 1px;
+  margin-left: 42%;
+}
+
+.start-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(255, 75, 43, 0.6);
+}
+
+/* === ДОБАВЬТЕ ЗДЕСЬ МЕДИАЗАПРОС === */
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .text-slide-content {
+    padding: 20px;
+    margin: 10px;
+    max-width: 95vw;
+  }
+  
+  .text-slide #textCaptionTop span {
+    font-size: 18px;
+  }
+  
+  .text-slide #textCaptionBottom span {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .caption span {
+    max-width: 95vw;
+    padding: 8px 15px;
+    font-size: 18px;
+  }
+  
+  .start-button {
+    margin-left: 0;
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+/* Адаптивность для текстовых слайдов */
+@media (max-width: 768px) {
+  .text-slide-content {
+    padding: 20px;
+    margin: 10px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .text-slide #textCaptionTop span {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .text-slide #textCaptionBottom span {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .start-button {
+    margin-left: 0;
+    padding: 12px 30px;
+    font-size: 16px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-slide-content {
+    padding: 15px;
+    margin: 5px;
+    max-width: 98vw;
+    max-height: 95vh;
+  }
+  
+  .text-slide #textCaptionTop span {
+    font-size: 16px;
+  }
+  
+  .text-slide #textCaptionBottom span {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  
+  .start-button {
+    padding: 10px 25px;
+    font-size: 14px;
+    margin-top: 15px;
+  }
+}
+
+/* === КОНЕЦ МЕДИАЗАПРОСА === */
+
+/* Скрываем фото на текстовых слайдах */
+.text-slide #photo,
+.text-slide #nextPhoto {
+  display: none;
+}
+
+/* Кнопка "Начать игру" */
+.start-button {
+  background: linear-gradient(45deg, #FF416C, #FF4B2B);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(255, 75, 43, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 30px;
+  letter-spacing: 1px;
+  margin-left: 42%; /* Сдвигаем на 50% вправо */
+  transform: translateX(-25%); /* Корректируем положение чтобы была по центру правой части */
+}
+
+.start-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(255, 75, 43, 0.6);
+}
+
+/* Скрываем фото на текстовых слайдах */
+.text-slide #photo,
+.text-slide #nextPhoto {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+<!-- Статичный фон с вашим изображением -->
+<div id="staticBackground">
+  <div class="backgroundOverlay"></div>
+</div>
+
+<div id="stage">
+  <div id="captionTop" class="caption"><span></span></div>
+  <div id="world">
+    <img id="photo" src="" alt="photo">
+    <img id="nextPhoto" src="" alt="next photo">
+    <!-- Хотспоты добавляются скриптом -->
+    <!-- Контейнер для текстовых слайдов -->
+    <div id="textSlide" class="text-slide" style="display: none;">
+      <div class="text-slide-content">
+        <div id="textCaptionTop" class="caption"><span></span></div>
+        <div id="textCaptionBottom" class="caption"><span></span></div>
+        <button id="startButton" class="start-button">Начать игру</button>
+      </div>
+    </div>
+  </div>
+  <div id="captionBottom" class="caption"><span></span></div>
+</div>
+
+<div id="zoomHud">100%</div>
+<button id="nextBtn">NEXT →</button>
+<div id="photoNumber">Фото 1 / 53</div>
+<div id="navPanel"></div>
+
+<script>
+/* === Каждая фотография описана отдельно === */
+const SCENES = [
+  {
+    src:'', // индекс 0 - текстовый слайд
+    captionTop:'Дорогая, поздравляю тебя с твоим двадцатилетием!',
+    captionBottom:'Ты уже очень взрослая, самостоятельная, сильная и почти независимая девочка, которой я очень горжусь. Но кроме того, что сегодня день твоего рождения, сегодня еще и наш первый юбилей. Ровно 5 лет назад случилась наша первая ссора, без которой, думаю, что мы бы сейчас не были вместе. За эти 5 лет я видел и продолжаю видеть как ты растешь, умнеешь, развиваешься и вдохновляешь всех, кто тебя окружает на изменения к лучшему. Ты встречаешь на своем пути много трудностей, но никогда не сдаешься и не сдашься, и все трудности окажутся под твоими длинными каблуками, все неприятные люди на твоем пути окажутся там же, все, кто в тебе сомневаются, окажутся там же. Я очень тебя люблю и подготовил к твоему дню небольшую игру. Тебе предстоит увидеть некоторое количество фотографий с подписями, указывающими на место, куда тебе нужно нажать для перехода к следующему уровню. На каждом фото слева снизу есть дверка, если нажать туда, то вернешься на предыдущий уровень. Если не получается найти кнопку для перехода, то через 20 секунд после попадания на уровень кнопка станет видимой и ты сможешь пройти дальше. Когда пройдешь все, то получишь доступ к сюрпризу. Удачи тебе, любовь моя. И с днем рождения!',
+    hotspots:[]
+  },  
+  {
+    src:'images/01.jpg', // индекс 1
+    captionTop:'Вернемся к самому началу',
+    captionBottom:'Что стало предметом раздора?',
+    hotspots:[
+      {id:'hot-next', x:33, y:46, r:5, color:'red', type:'next', target:2, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:0}
+    ]
+  },
+  {
+    src:'images/02.jpg',
+    captionTop:'Куда я тебя целую, когда ты так сидишь?', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:45, y:72, r:3, color:'red', type:'next', target:3, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:1}
+    ]
+  },
+  {
+    src:'images/03.jpg',
+    captionTop:'Место заполняемое теплом между нами', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:37, y:63, r:3, color:'red', type:'next', target:4, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:2}
+    ]
+  },
+  {
+    src:'images/04.jpg',
+    captionTop:'Такой у тебя пупок сладкий', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:89, y:60, r:3, color:'red', type:'next', target:5, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:3}
+    ]
+  },
+  {
+    src:'images/05.jpg',
+    captionTop:'Самый большой след от падения на трубы', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:77, y:68, r:3, color:'red', type:'next', target:6, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:4}
+    ]
+  },
+  {
+    src:'images/06.jpg',
+    captionTop:'Просто обожаю тебя', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:38, y:39, r:3, color:'red', type:'next', target:7, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:5}
+    ]
+  },
+  {
+    src:'images/07.jpg',
+    captionTop:'Предмет концептуального искусства', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:76, y:42, r:3, color:'red', type:'next', target:8, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:6}
+    ]
+  },
+  {
+    src:'images/08.jpg',
+    captionTop:'Где я нахожусь по мнению окружающих', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:50, y:65, r:3, color:'red', type:'next', target:9, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:7}
+    ]
+  },
+  {
+    src:'images/09.jpg',
+    captionTop:'Так спокойно на душе когда ты при мне', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:55, y:33, r:3, color:'red', type:'next', target:10, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:8}
+    ]
+  },
+  {
+    src:'images/10.jpg',
+    captionTop:'Куда попадает весь аджапсандал?', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:38, y:60, r:3, color:'red', type:'next', target:11, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:9}
+    ]
+  },
+  {
+    src:'images/11.jpg',
+    captionTop:'Где я стою на написанной тобою картине?', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:65, y:83, r:3, color:'red', type:'next', target:12, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:10}
+    ]
+  },
+  {
+    src:'images/12.jpg',
+    captionTop:'Найди ошибку', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:31, y:65, r:3, color:'red', type:'next', target:13, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:11}
+    ]
+  },
+  {
+    src:'images/13.jpg',
+    captionTop:'Покажи мне самый красивый взгляд, который я встречал в жизни', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:50, y:58, r:3, color:'red', type:'next', target:14, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:12}
+    ]
+  },
+  {
+    src:'images/14.jpg',
+    captionTop:'Такой атрибут сделает любой полет веселым', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:69, y:42, r:3, color:'red', type:'next', target:15, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:13}
+    ]
+  },
+  {
+    src:'images/15.jpg',
+    captionTop:'Самое большое, что есть на этой фотке', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:57, y:13, r:3, color:'red', type:'next', target:16, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:14}
+    ]
+  },
+  {
+    src:'images/16.jpg',
+    captionTop:'Чем обозначались военные походы в средневековье в определенную страну, знак тех кто шел в эти походы где-то на фото', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:65, y:61, r:3, color:'red', type:'next', target:17, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:15}
+    ]
+  },
+  {
+    src:'images/17.jpg',
+    captionTop:'Нет чувства приятнее чем ощущать твой поцелуй', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:53, y:47, r:3, color:'red', type:'next', target:18, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:16}
+    ]
+  },
+  {
+    src:'images/18.jpg',
+    captionTop:'Чего-то на этой фотографии нет сейчас', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:58, y:12, r:3, color:'red', type:'next', target:19, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:17}
+    ]
+  },
+  {
+    src:'images/19.jpg',
+    captionTop:'Вкусное что-то торчит', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:39, y:78, r:3, color:'red', type:'next', target:20, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:18}
+    ]
+  },
+  {
+    src:'images/20.jpg',
+    captionTop:'Люблю тебя удивлять', captionBottom:'Наведи чуть ниже центра',
+    hotspots:[
+      {id:'hot-next', x:45, y:60, r:3, color:'red', type:'next', target:21, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:19}
+    ]
+  },
+  {
+    src:'images/21.jpg',
+    captionTop:'Найди великого человека', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:62, y:64, r:3, color:'red', type:'next', target:22, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:20}
+    ]
+  },
+  {
+    src:'images/22.jpg',
+    captionTop:'Такая ты сладкая на вкус всегда', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:35, y:35, r:3, color:'red', type:'next', target:23, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:21}
+    ]
+  },
+  {
+    src:'images/23.jpg',
+    captionTop:'Распоясалась такие жесты мне показывать', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:39, y:84, r:3, color:'red', type:'next', target:24, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:22}
+    ]
+  },
+  {
+    src:'images/24.jpg',
+    captionTop:'Хочу попробовать тебя в этом костюме', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:49, y:62, r:3, color:'red', type:'next', target:25, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:23}
+    ]
+  },
+  {
+    src:'images/25.jpg',
+    captionTop:'Мяу Мяу', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:65, y:45, r:3, color:'red', type:'next', target:26, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:24}
+    ]
+  },
+  {
+    src:'images/26.jpg',
+    captionTop:'Когда нас кто-то фотографирует, то получается дебильно, а вот звезда на елочке классная', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:42, y:6, r:3, color:'red', type:'next', target:27, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:25}
+    ]
+  },
+  {
+    src:'images/27.jpg',
+    captionTop:'Долго скрывала свою истинную паучью натуру', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:37, y:40, r:3, color:'red', type:'next', target:28, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:26}
+    ]
+  },
+  {
+    src:'images/28.jpg',
+    captionTop:'Петя разбуди меня если я рот открывать стану', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:31, y:46, r:3, color:'red', type:'next', target:29, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:27}
+    ]
+  },
+  {
+    src:'images/29.jpg',
+    captionTop:'Паучиха окуклилась', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:48, y:47, r:3, color:'red', type:'next', target:30, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:28}
+    ]
+  },
+  {
+    src:'images/30.jpg',
+    captionTop:'Сосочек', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:38, y:66, r:3, color:'red', type:'next', target:31, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:29}
+    ]
+  },
+  {
+    src:'images/31.jpg',
+    captionTop:'Довольная мордашка и Голубая мечеть', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:38, y:27, r:3, color:'red', type:'next', target:32, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:30}
+    ]
+  },
+  {
+    src:'images/32.jpg',
+    captionTop:'Тотемное животное встретила', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:58, y:52, r:3, color:'red', type:'next', target:33, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:31}
+    ]
+  },
+  {
+    src:'images/33.jpg',
+    captionTop:'Твой смех меня обескураживает', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:35, y:33, r:3, color:'red', type:'next', target:34, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:32}
+    ]
+  },
+  {
+    src:'images/34.jpg',
+    captionTop:'Птичка кормит птичку', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:40, y:40, r:3, color:'red', type:'next', target:35, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:33}
+    ]
+  },
+  {
+    src:'images/35.jpg',
+    captionTop:'А это фото сделано незаодолго до твоей стремительной и уверенной походки ровно вперед от меня с Васей, фотки между прочим хорошие получились', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:44, y:47, r:3, color:'red', type:'next', target:36, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:34}
+    ]
+  },
+  {
+    src:'images/36.jpg',
+    captionTop:'Крылатая моя', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:45, y:59, r:3, color:'red', type:'next', target:37, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:35}
+    ]
+  },
+  {
+    src:'images/37.jpg',
+    captionTop:'Самый вкусный аджапсандал в моей жизни', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:48, y:48, r:3, color:'red', type:'next', target:38, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:36}
+    ]
+  },
+  {
+    src:'images/38.jpg',
+    captionTop:'Незадолго до соджи, лицо уже недовольно', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:59, y:51, r:3, color:'red', type:'next', target:39, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:37}
+    ]
+  },
+  {
+    src:'images/39.jpg',
+    captionTop:'Такие красивые и благоухающие пионы оказались', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:52, y:60, r:3, color:'red', type:'next', target:40, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:38}
+    ]
+  },
+  {
+    src:'images/40.jpg',
+    captionTop:'Кошка своей хозяйки', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:22, y:56, r:3, color:'red', type:'next', target:41, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:39}
+    ]
+  },
+  {
+    src:'images/41.jpg',
+    captionTop:'Найди тумбочку', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:2, y:47, r:3, color:'red', type:'next', target:42, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:40}
+    ]
+  },
+  {
+    src:'images/42.jpg',
+    captionTop:'Дикая девочка добывает картошку', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:25, y:67, r:3, color:'red', type:'next', target:43, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:41}
+    ]
+  },
+  {
+    src:'images/43.jpg',
+    captionTop:'Когда-нибудь я съем твои щеки', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:48, y:62, r:3, color:'red', type:'next', target:44, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:42}
+    ]
+  },
+  {
+    src:'images/44.jpg',
+    captionTop:'Смузи из шрека', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:49, y:77, r:3, color:'red', type:'next', target:45, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:43}
+    ]
+  },
+  {
+    src:'images/45.jpg',
+    captionTop:'ЧТо-то на этой фотографии потеряно', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:44, y:39, r:3, color:'red', type:'next', target:46, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:44}
+    ]
+  },
+  {
+    src:'images/46.jpg',
+    captionTop:'Опять плохо сфотографировали, но тут есть фото внутри фото, оно мне очень нравится', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:37, y:90, r:3, color:'red', type:'next', target:47, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:45}
+    ]
+  },
+  {
+    src:'images/47.jpg',
+    captionTop:'Куда я вопьюсь в первую очередь, если увижу такую картину', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:63, y:54, r:3, color:'red', type:'next', target:48, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:46}
+    ]
+  },
+  {
+    src:'images/48.jpg',
+    captionTop:'Тебе оказывается идут чепчики, хотя ты в любой одежде самая красивая девочка', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:39, y:44, r:3, color:'red', type:'next', target:49, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:47}
+    ]
+  },
+  {
+    src:'images/49.jpg',
+    captionTop:'Удар поставлен', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:77, y:90, r:3, color:'red', type:'next', target:50, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:48}
+    ]
+  },
+  {
+    src:'images/50.jpg',
+    captionTop:'И не очень важно какое у тебя настроение - плохое', captionBottom:'',
+    hotspots:[
+      {id:'hot-next', x:15, y:33, r:3, color:'red', type:'next', target:51, enterScale:6},
+      {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:49}
+    ]
+  },
+  {
+  src:'images/51.jpg',
+  captionTop:'или хорошее, я всегда люблю тебя одинаково сильно, моя дорогая', 
+  captionBottom:'',
+  hotspots:[
+    {id:'hot-next', x:14, y:33, r:3, color:'red', type:'next', target:52, enterScale:8}, // На последний текстовый слайд
+    {id:'hot-back', x:10, y:90, r:4, color:'blue', type:'back', target:50} // На предыдущую фото
+  ]
+},
+  {
+    src:'', // индекс 52 - последний текстовый слайд
+    captionTop:'Поздравляю с прохождением игры, ты умничка!',
+    captionBottom:'Теперь пришло время для приза: Отправляйся на ресепшн и забирай свою награду. А еще не забывай, ты самая прекрасная девушка на всем белом свете.',
+    hotspots:[]
+  }
+];
+/* --- Работа скрипта --- */
+const stage = document.getElementById('stage');
+const world = document.getElementById('world');
+const img = document.getElementById('photo');
+const nextImg = document.getElementById('nextPhoto');
+const capTop = document.getElementById('captionTop');
+const capBot = document.getElementById('captionBottom');
+const zoomHud = document.getElementById('zoomHud');
+const nextBtn = document.getElementById('nextBtn');
+const photoNumber = document.getElementById('photoNumber');
+const navPanel = document.getElementById('navPanel');
+const textSlide = document.getElementById('textSlide');
+const textCaptionTop = document.getElementById('textCaptionTop');
+const textCaptionBottom = document.getElementById('textCaptionBottom');
+const startButton = document.getElementById('startButton');
+
+let level = 0, imgW = 0, imgH = 0;
+let isTransitioning = false;
+let isHotspotTransition = false;
+let fadeInTimer = null;
+
+/* === Инициализация === */
+window.addEventListener('load', () => {
+  loadScene(0);
+  buildNavPanel();
+});
+
+window.addEventListener('resize', () => {
+  if (!isTransitioning) {
+    resizeStage();
+  }
+});
+
+/* === Отключена навигация стрелками === */
+// document.addEventListener('keydown', e => {
+//   if (isTransitioning) return;
+//   
+//   if (e.key === 'ArrowRight' && level < SCENES.length - 1) {
+//     loadScene(level + 1);
+//   } else if (e.key === 'ArrowLeft' && level > 0) {
+//     loadScene(level - 1);
+//   }
+// });
+
+/* === Отключена кнопка NEXT === */
+// nextBtn.addEventListener('click', () => {
+//   if (isTransitioning) return;
+//   
+//   if (level < SCENES.length - 1) {
+//     loadScene(level + 1);
+//   }
+// });
+
+/* === Кнопка "Начать игру" === */
+startButton.addEventListener('click', () => {
+  if (!isTransitioning) {
+    loadScene(1);
+  }
+});
+
+/* === Панель навигации === */
+function buildNavPanel() {
+  navPanel.innerHTML = '';
+  SCENES.forEach((_, i) => {
+    const s = document.createElement('span');
+    s.textContent = i + 1;
+    s.addEventListener('click', () => {
+      if (!isTransitioning) loadScene(i);
+    });
+    navPanel.appendChild(s);
+  });
+}
+
+/* === Плавный переход с зумом === */
+function startZoomTransition(targetScene, hotspot) {
+  if (isTransitioning) return;
+  
+  console.log('Starting zoom transition from level', level, 'to target', targetScene);
+  
+  if (targetScene < 0 || targetScene >= SCENES.length) {
+    console.error('Invalid target scene:', targetScene);
+    return;
+  }
+  
+  // Если переходим с 51 фото на последний текстовый слайд (52) - полностью удаляем текст с фото 51
+  if (level === 51 && targetScene === 52) {
+    console.log('Special transition from photo 51 to final text slide - removing photo 51 text');
+    
+    // Полностью очищаем текст с фото 51
+    capTop.querySelector('span').textContent = '';
+    capBot.querySelector('span').textContent = '';
+    
+    // Используем навигационную панель для перехода
+    const navElement = navPanel.children[52];
+    if (navElement) {
+      console.log('Clicking nav element 53');
+      setTimeout(() => {
+        navElement.click();
+      }, 100);
+    } else {
+      console.error('Nav element not found');
+      setTimeout(() => {
+        loadScene(52);
+      }, 100);
+    }
+    return;
+  }
+  
+  // Для всех остальных переходов - обычная анимация зума
+  isTransitioning = true;
+  isHotspotTransition = true;
+  
+  stage.classList.add('zooming');
+  
+  const rect = img.getBoundingClientRect();
+  const worldRect = world.getBoundingClientRect();
+  
+  const hotspotCenterX = rect.left + (rect.width * hotspot.x / 100);
+  const hotspotCenterY = rect.top + (rect.height * hotspot.y / 100);
+  
+  const worldCenterX = worldRect.left + worldRect.width / 2;
+  const worldCenterY = worldRect.top + worldRect.height / 2;
+  
+  const scale = hotspot.enterScale || 8;
+  const translateX = (worldCenterX - hotspotCenterX) * (scale - 1) / scale;
+  const translateY = (worldCenterY - hotspotCenterY) * (scale - 1) / scale;
+  
+  img.style.transform = `translate(-50%, -50%) scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+  
+  setTimeout(() => {
+    console.log('Transition complete, loading scene:', targetScene);
+    loadScene(targetScene);
+  }, 1000);
+}
+/* === Загрузка сцены === */
+function loadScene(i) {
+  console.log('Loading scene:', i);
+  
+  if (i < 0 || i >= SCENES.length) {
+    console.error('Cannot load scene: invalid index', i);
+    return;
+  }
+  
+  if (fadeInTimer) {
+    clearTimeout(fadeInTimer);
+    fadeInTimer = null;
+  }
+  
+  level = i;
+  const scene = SCENES[level];
+
+  console.log('Scene loaded:', scene);
+
+  // Проверяем, текстовый ли это слайд
+  if (!scene.src) {
+    showTextSlide(scene);
+  } else {
+    showPhotoSlide(scene);
+  }
+}
+function showTextSlide(scene) {
+  // Скрываем фото и показываем текстовый слайд
+  img.style.display = 'none';
+  nextImg.style.display = 'none';
+  textSlide.style.display = 'flex';
+  
+  // Устанавливаем текст
+  textCaptionTop.querySelector('span').textContent = scene.captionTop || '';
+  textCaptionBottom.querySelector('span').textContent = scene.captionBottom || '';
+  
+  // Показываем/скрываем кнопку "Начать игру" только на первом слайде
+  if (level === 0) {
+    startButton.style.display = 'block';
+  } else {
+    startButton.style.display = 'none';
+  }
+  
+  // Удаляем хотспоты
+  world.querySelectorAll('.hotspot').forEach(n => n.remove());
+  
+  updatePhotoNumber();
+  updateNavHighlight();
+  stage.classList.remove('zooming');
+  isTransitioning = false;
+}
+
+function showPhotoSlide(scene) {
+  // Скрываем текстовый слайд и показываем фото
+  textSlide.style.display = 'none';
+  img.style.display = 'block';
+  nextImg.style.display = 'block';
+  
+  // Восстанавливаем текст для всех фото-слайдов (включая фото 51 при возврате)
+  capTop.querySelector('span').textContent = scene.captionTop || '';
+  capBot.querySelector('span').textContent = scene.captionBottom || '';
+  
+  img.onload = function() {
+    resizeStage();
+    updatePhotoNumber();
+    updateNavHighlight();
+    
+    if (isHotspotTransition) {
+      world.querySelectorAll('.hotspot').forEach(n => n.remove());
+      
+      setTimeout(() => {
+        placeHotspots(scene.hotspots, true);
+        isHotspotTransition = false;
+        
+        fadeInTimer = setTimeout(() => {
+          makeHotspotsVisible();
+        }, 20000); // 20 секунд
+        
+      }, 1500);
+    } else {
+      placeHotspots(scene.hotspots, true);
+      
+      fadeInTimer = setTimeout(() => {
+        makeHotspotsVisible();
+      }, 20000); // 20 секунд
+    }
+    
+    stage.classList.remove('zooming');
+    isTransitioning = false;
+  };
+  
+  img.src = scene.src;
+  
+  if (img.complete) {
+    img.onload();
+  }
+}
+
+/* === Сделать хотспоты видимыми === */
+function makeHotspotsVisible() {
+  const nextHotspots = world.querySelectorAll('.hotspot.red.transparent');
+  nextHotspots.forEach(hotspot => {
+    hotspot.classList.remove('transparent');
+    hotspot.classList.add('fade-in');
+  });
+}
+
+/* === Хотспоты === */
+function placeHotspots(list = [], makeTransparent = false) {
+  world.querySelectorAll('.hotspot').forEach(n => n.remove());
+  
+  if (!list || list.length === 0) return;
+  
+  const rect = img.getBoundingClientRect();
+  const worldRect = world.getBoundingClientRect();
+  
+  imgW = rect.width;
+  imgH = rect.height;
+  
+  list.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'hotspot';
+    
+    if (h.color === 'red') {
+      el.classList.add('red', 'pulse');
+      if (makeTransparent) {
+        el.classList.add('transparent');
+      }
+    } else if (h.color === 'blue') {
+      el.classList.add('blue', 'back');
+    }
+    
+    const cx = (h.x / 100) * imgW;
+    const cy = (h.y / 100) * imgH;
+    const r = Math.min(imgW, imgH) * (h.r / 100);
+    const worldLeft = rect.left - worldRect.left;
+    const worldTop = rect.top - worldRect.top;
+    
+    el.style.left = (worldLeft + cx - r) + 'px';
+    el.style.top = (worldTop + cy - r) + 'px';
+    el.style.width = (2 * r) + 'px';
+    el.style.height = (2 * r) + 'px';
+    
+    if (h.color === 'blue') {
+      const imgEl = document.createElement('img');
+      imgEl.src = 'images/back.png';
+      imgEl.alt = 'Назад';
+      el.appendChild(imgEl);
+      
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!isTransitioning) {
+          loadScene(h.target);
+        }
+      });
+    } else {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!isTransitioning && h.type === 'next') {
+          startZoomTransition(h.target, h);
+        }
+      });
+    }
+    
+    world.appendChild(el);
+  });
+}
+
+function updatePhotoNumber() {
+  photoNumber.textContent = `Фото ${level + 1} / ${SCENES.length}`;
+}
+
+function updateNavHighlight() {
+  [...navPanel.children].forEach((el, i) => el.classList.toggle('active', i === level));
+}
+
+/* === Центровка фото и подписи === */
+function resizeStage() {
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+
+  const topSpace = vh * 0.05;
+  const bottomSpace = vh * 0.05;
+  const availableHeight = vh - topSpace - bottomSpace;
+  
+  img.style.transform = 'translate(-50%, -50%) scale(1)';
+  img.style.opacity = '1';
+  nextImg.style.transform = 'translate(-50%, -50%) scale(0.8)';
+  nextImg.style.opacity = '0';
+  
+  // Обновляем условие для последнего фото
+  if (level === SCENES.length - 1) {
+    img.style.maxWidth = 'none';
+    img.style.maxHeight = 'none';
+    nextImg.style.maxWidth = 'none';
+    nextImg.style.maxHeight = 'none';
+    world.style.height = (availableHeight * 1.3) + 'px';
+  } else {
+    img.style.maxWidth = '90vw';
+    img.style.maxHeight = availableHeight + 'px';
+    nextImg.style.maxWidth = '90vw';
+    nextImg.style.maxHeight = availableHeight + 'px';
+    world.style.height = availableHeight + 'px';
+  }
+
+  requestAnimationFrame(() => {
+    const rect = img.getBoundingClientRect();
+    capTop.style.top = (topSpace - 10) + 'px';
+    capBot.style.top = (vh - bottomSpace - capBot.offsetHeight - 10) + 'px';
+    
+    if (!isHotspotTransition) {
+      const scene = SCENES[level];
+      if (scene.src) { // Только для фото-слайдов
+        placeHotspots(scene.hotspots, true);
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
