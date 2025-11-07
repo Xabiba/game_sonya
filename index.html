@@ -260,6 +260,7 @@ html, body {
 }
 
 /* === СТИЛИ ДЛЯ ТЕКСТОВЫХ СЛАЙДОВ === */
+/* === СТИЛИ ДЛЯ ТЕКСТОВЫХ СЛАЙДОВ === */
 .text-slide {
   display: flex;
   flex-direction: column;
@@ -275,19 +276,24 @@ html, body {
 }
 
 .text-slide-content {
-  max-width: 800px;
-  padding: 40px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  max-width: 90%; /* Увеличили с 800px до 90% */
+  width: 1000px; /* Максимальная ширина */
+  padding: 60px 50px; /* Увеличили отступы */
+  background: rgba(0, 0, 0, 0.8); /* Сделали темнее для лучшей читаемости */
+  border-radius: 25px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
   margin: 20px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
+  min-height: 70vh; /* Занимает больше пространства по высоте */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .text-slide .caption {
   font-size: 18px;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .text-slide .caption span {
@@ -299,17 +305,25 @@ html, body {
   font-weight: 500;
 }
 
+/* Верхний текст - опустили вниз */
+.text-slide #textCaptionTop {
+  margin-top: 40px; /* Добавили отступ сверху */
+  margin-bottom: 30px;
+}
+
 .text-slide #textCaptionTop span {
   font-size: 22px;
   font-weight: 600;
   margin-bottom: 25px;
   color: #fff;
+  display: block;
 }
 
 .text-slide #textCaptionBottom span {
   font-size: 16px;
   line-height: 1.7;
   color: #fff;
+  display: block;
 }
 
 /* Кнопка "Начать игру" */
