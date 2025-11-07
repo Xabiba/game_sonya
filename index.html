@@ -260,7 +260,6 @@ html, body {
 }
 
 /* === СТИЛИ ДЛЯ ТЕКСТОВЫХ СЛАЙДОВ === */
-/* === СТИЛИ ДЛЯ ТЕКСТОВЫХ СЛАЙДОВ === */
 .text-slide {
   display: flex;
   flex-direction: column;
@@ -276,24 +275,26 @@ html, body {
 }
 
 .text-slide-content {
-  max-width: 90%; /* Увеличили с 800px до 90% */
-  width: 1000px; /* Максимальная ширина */
-  padding: 60px 50px; /* Увеличили отступы */
-  background: rgba(0, 0, 0, 0.8); /* Сделали темнее для лучшей читаемости */
+  max-width: 85%; /* Увеличили ширину */
+  width: 900px;
+  padding: 50px 60px; /* Увеличили отступы */
+  background: rgba(0, 0, 0, 0.8);
   border-radius: 25px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
   margin: 20px;
   backdrop-filter: blur(15px);
-  min-height: 70vh; /* Занимает больше пространства по высоте */
+  min-height: 75vh; /* Увеличили высоту блока */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between; /* Равномерное распределение */
+  box-sizing: border-box;
 }
 
 .text-slide .caption {
   font-size: 18px;
   line-height: 1.6;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
 .text-slide .caption span {
@@ -303,27 +304,49 @@ html, body {
   padding: 0;
   text-shadow: 0 2px 12px rgba(0,0,0,.8);
   font-weight: 500;
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 
 /* Верхний текст - опустили вниз */
 .text-slide #textCaptionTop {
-  margin-top: 40px; /* Добавили отступ сверху */
-  margin-bottom: 30px;
+  margin-top: 30px; /* Отступ сверху */
+  margin-bottom: 25px;
 }
 
 .text-slide #textCaptionTop span {
   font-size: 22px;
   font-weight: 600;
-  margin-bottom: 25px;
   color: #fff;
-  display: block;
 }
 
 .text-slide #textCaptionBottom span {
   font-size: 16px;
   line-height: 1.7;
   color: #fff;
-  display: block;
+}
+
+/* Кнопка "Начать игру" - вернули оригинальный размер */
+.start-button {
+  background: linear-gradient(45deg, #FF416C, #FF4B2B);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(255, 75, 43, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 30px;
+  letter-spacing: 1px;
+  align-self: center; /* Центрируем кнопку */
+}
+
+.start-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(255, 75, 43, 0.6);
 }
 
 /* Кнопка "Начать игру" */
