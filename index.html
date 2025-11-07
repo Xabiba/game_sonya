@@ -259,6 +259,18 @@ html, body {
   animation: hotspotPulse 2s infinite;
 }
 
+/* Отладочная линия по центру (можно удалить после проверки) */
+.debug-center-line {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: red;
+  z-index: 1000;
+  pointer-events: none;
+}
+
 /* === СТИЛИ ДЛЯ ТЕКСТОВЫХ СЛАЙДОВ === */
 .text-slide {
   display: flex;
@@ -275,13 +287,13 @@ html, body {
 }
 
 .text-slide-content {
-  max-width: 90%;
-  width: 100%;
+  max-width: 800px; /* Фиксированная максимальная ширина */
+  width: 90%;
   padding: 50px 40px;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 25px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-  margin: 20px;
+  margin: 20px auto; /* auto по бокам для центровки */
   backdrop-filter: blur(15px);
   min-height: 75vh;
   display: flex;
@@ -297,7 +309,6 @@ html, body {
   margin-bottom: 20px;
   width: 100%;
   text-align: center;
-  /* УБРАТЬ margin-left: 10%; */
 }
 
 .text-slide .caption span {
@@ -312,12 +323,11 @@ html, body {
   text-align: center;
 }
 
-/* Верхний текст - УБРАТЬ сдвиг */
+/* Верхний текст */
 .text-slide #textCaptionTop {
   margin-top: 30px;
   margin-bottom: 25px;
   width: 100%;
-  /* УБРАТЬ margin-left: 10%; */
 }
 
 .text-slide #textCaptionTop span {
@@ -348,7 +358,6 @@ html, body {
   transition: all 0.3s ease;
   margin-top: 30px;
   letter-spacing: 1px;
-  /* УБРАТЬ margin-left и transform */
 }
 
 .start-button:hover {
@@ -389,20 +398,10 @@ html, body {
 /* Адаптивность для текстовых слайдов */
 @media (max-width: 768px) {
   .text-slide-content {
-    max-width: 90%;
+    max-width: 95%;
     padding: 40px 25px;
-    margin: 15px;
+    margin: 15px auto;
     min-height: 80vh;
-  }
-  
-  .text-slide .caption {
-    /* УБРАТЬ margin-left: 5%; */
-  }
-  
-  .text-slide #textCaptionTop {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    /* УБРАТЬ margin-left: 5%; */
   }
   
   .text-slide #textCaptionTop span {
@@ -423,18 +422,10 @@ html, body {
 
 @media (max-width: 480px) {
   .text-slide-content {
-    max-width: 90%;
+    max-width: 95%;
     padding: 30px 20px;
-    margin: 10px;
+    margin: 10px auto;
     min-height: 85vh;
-  }
-  
-  .text-slide .caption {
-    /* УБРАТЬ margin-left: 3%; */
-  }
-  
-  .text-slide #textCaptionTop {
-    /* УБРАТЬ margin-left: 3%; */
   }
   
   .start-button {
