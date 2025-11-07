@@ -275,7 +275,7 @@ html, body {
 }
 
 .text-slide-content {
-  max-width: 90%; /* 5% свободного пространства с каждой стороны */
+  max-width: 90%;
   width: 100%;
   padding: 50px 40px;
   background: rgba(0, 0, 0, 0.8);
@@ -286,8 +286,8 @@ html, body {
   min-height: 75vh;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Все по центру по вертикали */
-  align-items: center; /* Все по центру по горизонтали */
+  justify-content: center;
+  align-items: center;
   box-sizing: border-box;
 }
 
@@ -297,6 +297,7 @@ html, body {
   margin-bottom: 20px;
   width: 100%;
   text-align: center;
+  margin-left: 10%; /* Сдвигаем текст вправо на 10% */
 }
 
 .text-slide .caption span {
@@ -316,6 +317,7 @@ html, body {
   margin-top: 30px;
   margin-bottom: 25px;
   width: 100%;
+  margin-left: 10%; /* Сдвигаем верхний текст вправо на 10% */
 }
 
 .text-slide #textCaptionTop span {
@@ -346,7 +348,6 @@ html, body {
   transition: all 0.3s ease;
   margin-top: 30px;
   letter-spacing: 1px;
-  /* Убрал margin-left и transform */
   align-self: center;
 }
 
@@ -386,18 +387,22 @@ html, body {
     font-size: 16px;
   }
 /* Адаптивность для текстовых слайдов */
-/* Адаптивность для текстовых слайдов */
 @media (max-width: 768px) {
   .text-slide-content {
-    max-width: 90%; /* 5% с каждой стороны */
+    max-width: 90%;
     padding: 40px 25px;
     margin: 15px;
     min-height: 80vh;
   }
   
+  .text-slide .caption {
+    margin-left: 5%; /* Меньший сдвиг на мобильных */
+  }
+  
   .text-slide #textCaptionTop {
     margin-top: 20px;
     margin-bottom: 20px;
+    margin-left: 5%; /* Меньший сдвиг на мобильных */
   }
   
   .text-slide #textCaptionTop span {
@@ -418,10 +423,18 @@ html, body {
 
 @media (max-width: 480px) {
   .text-slide-content {
-    max-width: 90%; /* 5% с каждой стороны */
+    max-width: 90%;
     padding: 30px 20px;
     margin: 10px;
     min-height: 85vh;
+  }
+  
+  .text-slide .caption {
+    margin-left: 3%; /* Еще меньший сдвиг на маленьких экранах */
+  }
+  
+  .text-slide #textCaptionTop {
+    margin-left: 3%; /* Еще меньший сдвиг на маленьких экранах */
   }
   
   .start-button {
