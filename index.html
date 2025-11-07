@@ -297,7 +297,7 @@ html, body {
   margin-bottom: 20px;
   width: 100%;
   text-align: center;
-  margin-left: 10%; /* Сдвигаем текст вправо на 10% */
+  /* УБРАТЬ margin-left: 10%; */
 }
 
 .text-slide .caption span {
@@ -312,12 +312,12 @@ html, body {
   text-align: center;
 }
 
-/* Верхний текст - опустили вниз */
+/* Верхний текст - УБРАТЬ сдвиг */
 .text-slide #textCaptionTop {
   margin-top: 30px;
   margin-bottom: 25px;
   width: 100%;
-  margin-left: 10%; /* Сдвигаем верхний текст вправо на 10% */
+  /* УБРАТЬ margin-left: 10%; */
 }
 
 .text-slide #textCaptionTop span {
@@ -348,7 +348,7 @@ html, body {
   transition: all 0.3s ease;
   margin-top: 30px;
   letter-spacing: 1px;
-  align-self: center;
+  /* УБРАТЬ margin-left и transform */
 }
 
 .start-button:hover {
@@ -396,13 +396,13 @@ html, body {
   }
   
   .text-slide .caption {
-    margin-left: 5%; /* Меньший сдвиг на мобильных */
+    /* УБРАТЬ margin-left: 5%; */
   }
   
   .text-slide #textCaptionTop {
     margin-top: 20px;
     margin-bottom: 20px;
-    margin-left: 5%; /* Меньший сдвиг на мобильных */
+    /* УБРАТЬ margin-left: 5%; */
   }
   
   .text-slide #textCaptionTop span {
@@ -430,11 +430,11 @@ html, body {
   }
   
   .text-slide .caption {
-    margin-left: 3%; /* Еще меньший сдвиг на маленьких экранах */
+    /* УБРАТЬ margin-left: 3%; */
   }
   
   .text-slide #textCaptionTop {
-    margin-left: 3%; /* Еще меньший сдвиг на маленьких экранах */
+    /* УБРАТЬ margin-left: 3%; */
   }
   
   .start-button {
@@ -465,8 +465,6 @@ html, body {
   transition: all 0.3s ease;
   margin-top: 30px;
   letter-spacing: 1px;
-  margin-left: 42%; /* Сдвигаем на 50% вправо */
-  transform: translateX(-25%); /* Корректируем положение чтобы была по центру правой части */
 }
 
 .start-button:hover {
