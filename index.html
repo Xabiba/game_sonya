@@ -386,57 +386,50 @@ html, body {
     font-size: 16px;
   }
 /* Адаптивность для текстовых слайдов */
+/* Адаптивность для текстовых слайдов */
 @media (max-width: 768px) {
   .text-slide-content {
-    padding: 20px;
-    margin: 10px;
-    max-width: 95vw;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 90%; /* 5% с каждой стороны */
+    padding: 40px 25px;
+    margin: 15px;
+    min-height: 80vh;
+  }
+  
+  .text-slide #textCaptionTop {
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
   
   .text-slide #textCaptionTop span {
-    font-size: 18px;
-    margin-bottom: 15px;
+    font-size: 20px;
   }
   
   .text-slide #textCaptionBottom span {
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
   }
   
   .start-button {
-    margin-left: 0;
     padding: 12px 30px;
     font-size: 16px;
-    margin-top: 20px;
+    margin-top: 25px;
   }
 }
 
 @media (max-width: 480px) {
   .text-slide-content {
-    padding: 15px;
-    margin: 5px;
-    max-width: 98vw;
-    max-height: 95vh;
-  }
-  
-  .text-slide #textCaptionTop span {
-    font-size: 16px;
-  }
-  
-  .text-slide #textCaptionBottom span {
-    font-size: 12px;
-    line-height: 1.4;
+    max-width: 90%; /* 5% с каждой стороны */
+    padding: 30px 20px;
+    margin: 10px;
+    min-height: 85vh;
   }
   
   .start-button {
     padding: 10px 25px;
     font-size: 14px;
-    margin-top: 15px;
+    margin-top: 20px;
   }
 }
-
 /* === КОНЕЦ МЕДИАЗАПРОСА === */
 
 /* Скрываем фото на текстовых слайдах */
