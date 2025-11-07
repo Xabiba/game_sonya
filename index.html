@@ -275,18 +275,19 @@ html, body {
 }
 
 .text-slide-content {
-  max-width: 85%; /* Увеличили ширину */
-  width: 900px;
-  padding: 50px 60px; /* Увеличили отступы */
+  max-width: 90%; /* 5% свободного пространства с каждой стороны */
+  width: 100%;
+  padding: 50px 40px;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 25px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
   margin: 20px;
   backdrop-filter: blur(15px);
-  min-height: 75vh; /* Увеличили высоту блока */
+  min-height: 75vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Равномерное распределение */
+  justify-content: center; /* Все по центру по вертикали */
+  align-items: center; /* Все по центру по горизонтали */
   box-sizing: border-box;
 }
 
@@ -295,6 +296,7 @@ html, body {
   line-height: 1.6;
   margin-bottom: 20px;
   width: 100%;
+  text-align: center;
 }
 
 .text-slide .caption span {
@@ -311,23 +313,26 @@ html, body {
 
 /* Верхний текст - опустили вниз */
 .text-slide #textCaptionTop {
-  margin-top: 30px; /* Отступ сверху */
+  margin-top: 30px;
   margin-bottom: 25px;
+  width: 100%;
 }
 
 .text-slide #textCaptionTop span {
   font-size: 22px;
   font-weight: 600;
   color: #fff;
+  text-align: center;
 }
 
 .text-slide #textCaptionBottom span {
   font-size: 16px;
   line-height: 1.7;
   color: #fff;
+  text-align: center;
 }
 
-/* Кнопка "Начать игру" - вернули оригинальный размер */
+/* Кнопка "Начать игру" - по центру */
 .start-button {
   background: linear-gradient(45deg, #FF416C, #FF4B2B);
   color: white;
@@ -341,29 +346,8 @@ html, body {
   transition: all 0.3s ease;
   margin-top: 30px;
   letter-spacing: 1px;
-  align-self: center; /* Центрируем кнопку */
-}
-
-.start-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 75, 43, 0.6);
-}
-
-/* Кнопка "Начать игру" */
-.start-button {
-  background: linear-gradient(45deg, #FF416C, #FF4B2B);
-  color: white;
-  border: none;
-  padding: 15px 40px;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 50px;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(255, 75, 43, 0.4);
-  transition: all 0.3s ease;
-  margin-top: 30px;
-  letter-spacing: 1px;
-  margin-left: 42%;
+  /* Убрал margin-left и transform */
+  align-self: center;
 }
 
 .start-button:hover {
